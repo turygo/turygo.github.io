@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@plugin '@tailwindcss/typography';
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -39,7 +39,7 @@
   html {
     overflow-y: auto;
     color-scheme: light;
-    scroll-padding-top: 100px;
+    scroll-padding-top: 24px;
   }
 
   html.dark {
@@ -54,28 +54,18 @@
   body {
     @apply font-sans antialiased;
     @apply flex flex-col;
-    @apply bg-neutral-100 dark:bg-neutral-900;
-    @apply text-black/75 dark:text-white/75;
-  }
-
-  header {
-    @apply fixed top-0 right-0 left-0 z-50 py-6;
-    @apply bg-neutral-100/75 dark:bg-neutral-900/75;
-    @apply saturate-200 backdrop-blur-xs;
+    @apply bg-[#f6f5f3] dark:bg-[#171716];
+    @apply text-[#211f1c] dark:text-white/75;
   }
 
   main {
-    @apply flex-1 py-32;
-  }
-
-  footer {
-    @apply py-6 text-sm;
+    @apply flex-1;
   }
 
   article {
     @apply prose prose-neutral dark:prose-invert prose-img:mx-auto prose-img:my-auto max-w-full;
-    @apply prose-headings:font-semibold;
-    @apply prose-headings:text-black dark:prose-headings:text-white;
+    @apply prose-headings:font-serif prose-headings:font-semibold;
+    @apply prose-headings:text-[#211f1c] dark:prose-headings:text-white;
   }
 }
 

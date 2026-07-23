@@ -2,17 +2,19 @@
 const { prevPost, nextPost } = Astro.props;
 ---
 
-<div class="grid grid-cols-2 gap-1.5 sm:gap-3">
+<div
+  class="grid grid-cols-2 gap-6 border-t border-[#211f1c]/15 pt-6 dark:border-white/20"
+>
   {
     prevPost?.id ? (
       <a
         href={`/blog/${prevPost?.id}`}
-        class="group relative flex flex-nowrap rounded-lg border border-black/15 px-4 py-3 pl-10 no-underline transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+        class="group relative flex flex-nowrap py-3 pl-7 font-serif text-sm no-underline transition-colors hover:text-[#211f1c] dark:hover:text-white"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
-          class="absolute top-1/2 left-2 size-5 -translate-y-1/2 fill-none stroke-current stroke-2"
+          class="absolute top-1/2 left-0 size-4 -translate-y-1/2 fill-none stroke-current stroke-[1.5]"
         >
           <line
             x1="5"
@@ -37,12 +39,12 @@ const { prevPost, nextPost } = Astro.props;
     nextPost?.id ? (
       <a
         href={`/blog/${nextPost?.id}`}
-        class="group relative flex grow flex-row-reverse flex-nowrap rounded-lg border border-black/15 px-4 py-4 pr-10 no-underline transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+        class="group relative flex grow flex-row-reverse flex-nowrap py-3 pr-7 text-right font-serif text-sm no-underline transition-colors hover:text-[#211f1c] dark:hover:text-white"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
-          class="absolute top-1/2 right-2 size-5 -translate-y-1/2 fill-none stroke-current stroke-2"
+          class="absolute top-1/2 right-0 size-4 -translate-y-1/2 fill-none stroke-current stroke-[1.5]"
         >
           <line
             x1="5"

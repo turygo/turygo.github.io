@@ -31,9 +31,11 @@ const sortedPosts = posts.sort(
 
 <Layout title={`Tag: ${id}`} description={`Posts with the tag: ${id}`}>
   <Container>
-    <div class="space-y-10" data-pagefind-ignore>
+    <div class="space-y-10 pt-16" data-pagefind-ignore>
       <BackToPrevious href="/tags"> All tags </BackToPrevious>
-      <h1 class="animate font-semibold text-black dark:text-white">
+      <h1
+        class="animate font-serif text-[32px] font-semibold text-[#211f1c] dark:text-white"
+      >
         Posts tagged with "{id}"
       </h1>
       <ul class="animate flex flex-col gap-4">
