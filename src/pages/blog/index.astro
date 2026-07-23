@@ -2,7 +2,6 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
-import ArrowCard from "@components/ArrowCard.astro";
 import { BLOG } from "@consts";
 
 const data = (await getCollection("blog"))
@@ -23,33 +22,110 @@ const posts = data.reduce((acc: Acc, post) => {
 }, {});
 
 const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
+
+// Global numbering in display order: 01, 02, ...
+const numbers = new Map<string, string>();
+data.forEach((post, i) => {
+  numbers.set(post.id, String(i + 1).padStart(2, "0"));
+});
+
+const CN_DIGITS = "〇一二三四五六七八九";
+const toCnYear = (year: string) =>
+  year
+    .split("")
+    .map((d) => CN_DIGITS[Number(d)])
+    .join("");
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+const fmtDate = (d: Date) =>
+  `${d.getFullYear()}.${pad2(d.getMonth() + 1)}.${pad2(d.getDate())}`;
 ---
 
 <Layout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
   <Container>
     <aside data-pagefind-ignore>
-      <div class="space-y-10">
-        <div class="space-y-4">
-          {
-            years.map((year) => (
-              <section class="animate space-y-4">
-                <div class="font-semibold text-black dark:text-white">
-                  {year}
-                </div>
-                <div>
-                  <ul class="not-prose flex flex-col gap-4">
-                    {posts[year].map((post) => (
-                      <li>
-                        <ArrowCard entry={post} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </section>
-            ))
-          }
+      <div class="animate space-y-4 pt-6 pb-14 text-center">
+        <div
+          class="font-mono text-[11px] font-medium tracking-[0.3em] text-black/40 uppercase dark:text-white/40"
+        >
+          Table of Contents
+        </div>
+        <h1
+          class="font-serif text-[42px] leading-tight font-bold text-black dark:text-white"
+        >
+          {BLOG.TITLE}
+        </h1>
+        <p class="text-sm text-black/60 dark:text-white/60">
+          {BLOG.DESCRIPTION} · 共 {data.length} 篇
+        </p>
+        <div
+          aria-hidden="true"
+          class="font-serif text-black/40 dark:text-white/40"
+        >
+          ❧
         </div>
       </div>
+
+      {
+        years.map((year) => (
+          <section class="animate mb-16">
+            <div class="mb-8 flex items-center gap-5">
+              <span
+                aria-hidden="true"
+                class="h-[3px] flex-1 border-y border-black/15 dark:border-white/20"
+              />
+              <span class="pl-[0.34em] font-serif text-[15px] font-semibold tracking-[0.34em] text-black dark:text-white">
+                {toCnYear(year)}
+              </span>
+              <span class="font-mono text-[11px] tracking-wider text-black/40 dark:text-white/40">
+                {posts[year].length} 篇
+              </span>
+              <span
+                aria-hidden="true"
+                class="h-[3px] flex-1 border-y border-black/15 dark:border-white/20"
+              />
+            </div>
+            <ul class="not-prose flex flex-col gap-7">
+              {posts[year].map((post) => (
+                <li>
+                  <a href={`/${post.collection}/${post.id}`} class="group">
+                    <div class="flex items-baseline gap-3">
+                      <span class="min-w-[30px] font-mono text-xs font-medium text-black/40 dark:text-white/40">
+                        {numbers.get(post.id)}
+                      </span>
+                      <span class="font-serif text-[17px] font-semibold text-black decoration-1 underline-offset-4 group-hover:underline dark:text-white">
+                        {post.data.title}
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        class="min-w-6 flex-1 -translate-y-[4px] border-b border-dotted border-black/30 dark:border-white/30"
+                      />
+                      <time
+                        datetime={post.data.date.toISOString()}
+                        class="font-mono text-xs whitespace-nowrap text-black/60 dark:text-white/60"
+                      >
+                        {fmtDate(post.data.date)}
+                      </time>
+                    </div>
+                    <p class="mt-1.5 ml-[42px] text-sm leading-7 text-black/60 dark:text-white/60">
+                      {post.data.description}
+                    </p>
+                    {post.data.tags && post.data.tags.length > 0 && (
+                      <div class="mt-1 ml-[42px] flex gap-2.5">
+                        {post.data.tags.map((tag) => (
+                          <span class="font-mono text-[10px] font-medium tracking-[0.14em] text-black/40 uppercase dark:text-white/40">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
     </aside>
   </Container>
 </Layout>
