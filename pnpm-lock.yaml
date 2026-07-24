@@ -21,11 +21,11 @@ importers:
         specifier: ^3.6.0
         version: 3.7.3
       '@fontsource/geist-mono':
-        specifier: ^5.2.7
-        version: 5.2.8
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/geist-sans':
-        specifier: ^5.2.5
-        version: 5.2.5
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/noto-serif-sc':
         specifier: ^5.3.0
         version: 5.3.0
@@ -479,11 +479,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fontsource/geist-mono@5.2.8':
-    resolution: {integrity: sha512-YqZUb3X42GjRaHkibUNyE8K4Rk9A6I9Ez81YpJYiuJN4ggmTW2ixoQpa9EWCPfXZtIsCQJTyrDoV9OJOZO/UcA==}
+  '@fontsource/geist-mono@5.3.0':
+    resolution: {integrity: sha512-UtJ1BBBCVpMYdIcW7nEB45UAoAw5M53ZXs2t0ciPW+IokuAAIc56M8+kW5tXbRJCTpDw4XTtU7proT6NdQAHTg==}
 
-  '@fontsource/geist-sans@5.2.5':
-    resolution: {integrity: sha512-anllOHyJbElRs9fV15TeDRqAeb1IKm4bSknPl6ZMoyPTx1BBy7logudcUwpNjmQLkzn4Q0JGQLRCUKJYoyST6A==}
+  '@fontsource/geist-sans@5.3.0':
+    resolution: {integrity: sha512-AmG7cE1AvE4NHROPaOl1sN+a02cB5xy6pA/ZV76HXqWTCsJTV2SCBc9DTFHfJqnVOODm7HhXIYtUIb75NP5QXQ==}
 
   '@fontsource/noto-serif-sc@5.3.0':
     resolution: {integrity: sha512-0/zaEFkidiWldE62rTeD74x8ygUsQvejiSNtO0LQxQk3qpaHnlMZ3w4C7yH80B4KTIg8VKeFP4oSgwWMchY9+g==}
@@ -2907,9 +2907,9 @@ snapshots:
   '@esbuild/win32-x64@0.27.7':
     optional: true
 
-  '@fontsource/geist-mono@5.2.8': {}
+  '@fontsource/geist-mono@5.3.0': {}
 
-  '@fontsource/geist-sans@5.2.5': {}
+  '@fontsource/geist-sans@5.3.0': {}
 
   '@fontsource/noto-serif-sc@5.3.0': {}
 
