@@ -29,4 +29,6 @@ draft: false
 
 推送到 `hugo` 分支后由 GitHub Actions 自动构建并发布到 GitHub Pages（见 `.github/workflows/deploy.yml`）。
 
+部署 action 使用 `actions/deploy-pages@v5`（Node.js 24 运行时），站点构建仍使用 Node.js 22。
+
 首次启用需在仓库 Settings → Pages 中把 Source 设为 **GitHub Actions**，并确认自定义域名 `turygo.com`。
