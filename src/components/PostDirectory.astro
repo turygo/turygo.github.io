@@ -6,115 +6,74 @@ const data = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-type Acc = {
-  [year: string]: CollectionEntry<"blog">[];
-};
+type PostsByYear = Record<string, CollectionEntry<"blog">[]>;
 
-const posts = data.reduce((acc: Acc, post) => {
+const postsByYear = data.reduce<PostsByYear>((acc, post) => {
   const year = post.data.date.getFullYear().toString();
-  if (!acc[year]) {
-    acc[year] = [];
-  }
-  acc[year].push(post);
+  (acc[year] ??= []).push(post);
   return acc;
 }, {});
 
-const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
+const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
 
 const numbers = new Map<string, string>();
 data.forEach((post, i) => {
   numbers.set(post.id, String(i + 1).padStart(2, "0"));
 });
-
 const CN_DIGITS = "〇一二三四五六七八九";
 const toCnYear = (year: string) =>
   year
     .split("")
-    .map((d) => CN_DIGITS[Number(d)])
+    .map((digit) => CN_DIGITS[Number(digit)])
     .join("");
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
-const fmtDate = (d: Date) =>
-  `${d.getFullYear()}.${pad2(d.getMonth() + 1)}.${pad2(d.getDate())}`;
+const fmtDate = (date: Date) =>
+  `${date.getFullYear()}.${pad2(date.getMonth() + 1)}.${pad2(date.getDate())}`;
 const description = BLOG.DESCRIPTION.replace(/[。.]$/, "");
 ---
 
-<aside data-pagefind-ignore>
-  <div class="animate pt-20 pb-16 text-center">
-    <div
-      class="font-mono text-[11px] font-medium tracking-[0.3em] text-[#211f1c]/40 uppercase dark:text-white/40"
-    >
-      Table of Contents
-    </div>
-    <h1
-      class="mt-4 font-serif text-[46px] leading-[1.15] font-bold text-[#211f1c] dark:text-white"
-    >
-      目录
-    </h1>
-    <p class="mt-3.5 text-sm text-[#211f1c]/60 dark:text-white/60">
-      {description} · 共 {data.length} 篇
-    </p>
-    <div
-      aria-hidden="true"
-      class="mt-[30px] font-serif text-[#211f1c]/40 dark:text-white/40"
-    >
-      ❧
-    </div>
-  </div>
+<aside class="post-directory" data-pagefind-ignore>
+  <header class="editorial-intro">
+    <div class="eyebrow">Table of Contents</div>
+    <h1>目录</h1>
+    <p class="intro-description">{description} · 共 {data.length} 篇</p>
+  </header>
 
   {
     years.map((year) => (
-      <section class="animate mb-[72px]">
-        <div class="mb-[34px] flex items-center gap-5">
-          <span
-            aria-hidden="true"
-            class="h-[3px] flex-1 border-y border-[#211f1c]/15 dark:border-white/20"
-          />
-          <span class="pl-[0.34em] font-serif text-[15px] font-semibold tracking-[0.34em] text-[#211f1c] dark:text-white">
-            {toCnYear(year)}
-          </span>
-          <span class="font-mono text-[11px] tracking-wider text-[#211f1c]/40 dark:text-white/40">
-            {posts[year].length} 篇
-          </span>
-          <span
-            aria-hidden="true"
-            class="h-[3px] flex-1 border-y border-[#211f1c]/15 dark:border-white/20"
-          />
+      <section class="archive-year" aria-labelledby={`archive-year-${year}`}>
+        <div class="archive-caption">
+          <h2 id={`archive-year-${year}`}>{toCnYear(year)}</h2>
+          <span class="eyebrow">{postsByYear[year].length} 篇</span>
         </div>
-        <ul class="not-prose flex flex-col gap-[26px]">
-          {posts[year].map((post) => (
+        <ul class="archive-list">
+          {postsByYear[year].map((post) => (
             <li>
-              <a href={`/${post.collection}/${post.id}`} class="group">
-                <div class="grid grid-cols-[30px_minmax(0,1fr)] items-baseline gap-x-3 sm:flex sm:gap-3">
-                  <span class="min-w-[30px] font-mono text-xs font-medium text-[#211f1c]/40 dark:text-white/40">
-                    {numbers.get(post.id)}
-                  </span>
-                  <span class="min-w-0 font-serif text-[17px] leading-[1.5] font-semibold text-[#211f1c] decoration-1 underline-offset-4 group-hover:underline dark:text-white">
-                    {post.data.title}
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    class="hidden min-w-6 flex-1 -translate-y-[4px] border-b border-dotted border-[#211f1c]/40 sm:block dark:border-white/30"
-                  />
-                  <time
-                    datetime={post.data.date.toISOString()}
-                    class="col-start-2 mt-1 font-mono text-xs whitespace-nowrap text-[#211f1c]/60 sm:mt-0 dark:text-white/60"
-                  >
-                    {fmtDate(post.data.date)}
-                  </time>
-                </div>
-                <p class="mt-1.5 ml-[42px] text-sm leading-7 text-[#211f1c]/60 dark:text-white/60">
-                  {post.data.description}
-                </p>
-                {post.data.tags && post.data.tags.length > 0 && (
-                  <div class="mt-1 ml-[42px] flex gap-2.5">
-                    {post.data.tags.map((tag) => (
-                      <span class="font-mono text-[10px] font-medium tracking-[0.14em] text-[#211f1c]/40 uppercase dark:text-white/40">
-                        {tag}
-                      </span>
-                    ))}
+              <a href={`/${post.collection}/${post.id}`} class="archive-post">
+                <time
+                  datetime={post.data.date.toISOString()}
+                  class="archive-date"
+                >
+                  {fmtDate(post.data.date)}
+                </time>
+                <div class="archive-copy">
+                  <div class="archive-heading">
+                    <span class="archive-number">{numbers.get(post.id)}</span>
+                    <h3>{post.data.title}</h3>
                   </div>
-                )}
+                  <p>{post.data.description}</p>
+                  {post.data.tags && post.data.tags.length > 0 && (
+                    <div class="archive-tags">
+                      {post.data.tags.map((tag) => (
+                        <span>{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h14m-6-6 6 6-6 6" />
+                </svg>
               </a>
             </li>
           ))}
@@ -123,3 +82,154 @@ const description = BLOG.DESCRIPTION.replace(/[。.]$/, "");
     ))
   }
 </aside>
+
+<style>
+  .post-directory {
+    padding-block: var(--space-6) var(--space-7);
+  }
+
+  .editorial-intro {
+    padding-block: var(--space-6) var(--space-8);
+  }
+
+  .editorial-intro h1 {
+    margin-block: var(--space-4) var(--space-5);
+    font-size: var(--font-size-title);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.16;
+  }
+
+  .intro-description {
+    max-width: 25rem;
+    color: var(--color-text-secondary);
+  }
+
+  .archive-year + .archive-year {
+    margin-top: var(--space-7);
+  }
+
+  .archive-caption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .archive-caption h2 {
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .archive-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .archive-post {
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr) 2rem;
+    align-items: start;
+    gap: var(--space-5);
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color var(--motion-duration) var(--motion-ease);
+  }
+
+  .archive-date {
+    padding-top: var(--space-2);
+    color: var(--color-text-secondary);
+    font: var(--font-size-meta) / 1.6 var(--font-mono);
+  }
+
+  .archive-copy {
+    min-width: 0;
+  }
+
+  .archive-heading {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+  }
+
+  .archive-number {
+    flex: none;
+    color: var(--color-text-secondary);
+    font: var(--font-size-meta) / 1.6 var(--font-mono);
+  }
+
+  .archive-heading h3 {
+    margin: 0 0 var(--space-2);
+    font-size: 1.625rem;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.3;
+    transition: color var(--motion-duration) var(--motion-ease);
+  }
+
+  .archive-copy > p {
+    margin: 0 0 var(--space-4);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+    line-height: var(--line-height-body);
+  }
+
+  .archive-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-meta);
+  }
+
+  .archive-post > svg {
+    width: 20px;
+    height: 20px;
+    margin-top: var(--space-2);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    color: var(--color-text-secondary);
+    transition:
+      transform var(--motion-duration) var(--motion-ease),
+      color var(--motion-duration) var(--motion-ease);
+  }
+
+  .archive-post:hover,
+  .archive-post:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .archive-post:hover > svg,
+  .archive-post:focus-visible > svg {
+    transform: translateX(4px);
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 760px) {
+    .editorial-intro {
+      padding-block: var(--space-4) var(--space-7);
+    }
+
+    .archive-post {
+      grid-template-columns: minmax(0, 1fr) 1.5rem;
+      gap: var(--space-3);
+    }
+
+    .archive-date {
+      grid-column: 1 / -1;
+      padding-top: 0;
+    }
+
+    .archive-heading h3 {
+      font-size: 1.5rem;
+    }
+  }
+</style>

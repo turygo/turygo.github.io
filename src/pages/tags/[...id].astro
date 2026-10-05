@@ -8,10 +8,10 @@ import BackToPrevious from "@components/BackToPrevious.astro";
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
 
-  // Get unique tags
+  // 收集所有唯一标签
   const tags = [...new Set(posts.flatMap((post) => post.data.tags || []))];
 
-  // Create paths for each tag
+  // 为每个标签生成路由
   return tags.map((tag) => ({
     params: { id: tag },
     props: {
@@ -23,7 +23,7 @@ export async function getStaticPaths() {
 const { id } = Astro.params;
 const { posts } = Astro.props;
 
-// Sort posts by date, most recent first
+// 按日期从新到旧排序
 const sortedPosts = posts.sort(
   (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
 );
@@ -31,16 +31,34 @@ const sortedPosts = posts.sort(
 
 <Layout title={`Tag: ${id}`} description={`Posts with the tag: ${id}`}>
   <Container>
-    <div class="space-y-10 pt-16" data-pagefind-ignore>
-      <BackToPrevious href="/tags"> All tags </BackToPrevious>
-      <h1
-        class="animate font-serif text-[32px] font-semibold text-[#211f1c] dark:text-white"
-      >
-        Posts tagged with "{id}"
-      </h1>
-      <ul class="animate flex flex-col gap-4">
-        {sortedPosts.map((post) => <ArrowCard entry={post} />)}
+    <section class="tag-page" data-pagefind-ignore>
+      <BackToPrevious href="/tags">All tags</BackToPrevious>
+      <h1 class="page-heading">Posts tagged with "{id}"</h1>
+      <ul class="tag-post-list">
+        {
+          sortedPosts.map((post) => (
+            <li>
+              <ArrowCard entry={post} />
+            </li>
+          ))
+        }
       </ul>
-    </div>
+    </section>
   </Container>
 </Layout>
+
+<style>
+  .tag-page {
+    padding-block: var(--space-6) var(--space-7);
+  }
+
+  .tag-page h1 {
+    margin-block: var(--space-5) var(--space-6);
+  }
+
+  .tag-post-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+</style>

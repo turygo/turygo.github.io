@@ -3,29 +3,6 @@ import "../styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import { SITE } from "@consts";
 
-import "@fontsource/geist-sans/100.css";
-import "@fontsource/geist-sans/200.css";
-import "@fontsource/geist-sans/300.css";
-import "@fontsource/geist-sans/400.css";
-import "@fontsource/geist-sans/500.css";
-import "@fontsource/geist-sans/600.css";
-import "@fontsource/geist-sans/700.css";
-import "@fontsource/geist-sans/800.css";
-import "@fontsource/geist-sans/900.css";
-import "@fontsource/geist-mono/100.css";
-import "@fontsource/geist-mono/200.css";
-import "@fontsource/geist-mono/300.css";
-import "@fontsource/geist-mono/400.css";
-import "@fontsource/geist-mono/500.css";
-import "@fontsource/geist-mono/600.css";
-import "@fontsource/geist-mono/700.css";
-import "@fontsource/geist-mono/800.css";
-import "@fontsource/geist-mono/900.css";
-import "@fontsource/source-serif-4/600.css";
-import "@fontsource/source-serif-4/700.css";
-import "@fontsource/noto-serif-sc/600.css";
-import "@fontsource/noto-serif-sc/700.css";
-
 interface Props {
   title: string;
   description: string;
@@ -89,145 +66,108 @@ const { title, description, image } = Astro.props;
 <meta property="twitter:description" content={description} />
 {image && <meta property="twitter:image" content={new URL(image, Astro.url)} />}
 
-<!-- PageFind -->
-<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
-<script is:inline src="/pagefind/pagefind-ui.js"></script>
-
 <ClientRouter />
 
 <script is:inline>
-  function init() {
-    preloadTheme();
-    onScroll();
-    animate();
-    addCopyCodeButtons();
-
-    const backToTop = document.getElementById("back-to-top");
-    backToTop?.addEventListener("click", (event) => scrollToTop(event));
-
-    const backToPrev = document.getElementById("back-to-prev");
-    backToPrev?.addEventListener("click", () => window.history.back());
-
-    const themeToggle = document.getElementById("theme-toggle");
-    themeToggle?.addEventListener("click", () => {
-      const isDark = document.documentElement.classList.contains("dark");
-      localStorage.setItem("theme", isDark ? "light" : "dark");
-      toggleTheme(!isDark);
-    });
-
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", (event) => {
-        if (localStorage.theme !== "light" && localStorage.theme !== "dark") {
-          toggleTheme(event.matches);
-        }
-      });
-
-    document.addEventListener("scroll", onScroll);
-  }
-
-  function animate() {
-    const animateElements = document.querySelectorAll(".animate");
-
-    animateElements.forEach((element, index) => {
-      setTimeout(() => {
-        element.classList.add("show");
-      }, index * 100);
-    });
-  }
-
-  function onScroll() {
-    if (window.scrollY > 0) {
-      document.documentElement.classList.add("scrolled");
-    } else {
-      document.documentElement.classList.remove("scrolled");
-    }
-  }
-
-  function scrollToTop(event) {
-    event.preventDefault();
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }
-
-  function toggleTheme(dark) {
-    const css = document.createElement("style");
-
-    css.appendChild(
-      document.createTextNode(
-        `* {
-             -webkit-transition: none !important;
-             -moz-transition: none !important;
-             -o-transition: none !important;
-             -ms-transition: none !important;
-             transition: none !important;
-          }
-        `,
-      ),
+  (() => {
+    const theme = localStorage.getItem("theme");
+    document.documentElement.classList.toggle(
+      "dark",
+      theme === "dark" ||
+        (theme !== "light" &&
+          matchMedia("(prefers-color-scheme: dark)").matches),
     );
+  })();
+</script>
 
-    document.head.appendChild(css);
+<script>
+  import type { TransitionBeforeSwapEvent } from "astro:transitions/client";
 
-    if (dark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+  const darkPreference = matchMedia("(prefers-color-scheme: dark)");
 
-    window.getComputedStyle(css).opacity;
-    document.head.removeChild(css);
+  function prefersDark() {
+    const theme = localStorage.getItem("theme");
+    return theme === "dark" || (theme !== "light" && darkPreference.matches);
   }
 
-  function preloadTheme() {
-    const userTheme = localStorage.theme;
-
-    if (userTheme === "light" || userTheme === "dark") {
-      toggleTheme(userTheme === "dark");
-    } else {
-      toggleTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
-    }
+  function syncTheme() {
+    const dark = prefersDark();
+    document.documentElement.classList.toggle("dark", dark);
+    const button = document.getElementById("theme-toggle");
+    button?.setAttribute("aria-pressed", String(dark));
+    button?.setAttribute("title", "切换主题");
   }
 
   function addCopyCodeButtons() {
-    let copyButtonLabel = "📋";
-    let codeBlocks = Array.from(document.querySelectorAll("pre"));
-
-    async function copyCode(codeBlock, copyButton) {
-      const codeText = codeBlock.innerText;
-      const buttonText = copyButton.innerText;
-      const textToCopy = codeText.replace(buttonText, "");
-
-      await navigator.clipboard.writeText(textToCopy);
-      copyButton.innerText = "✅";
-
-      setTimeout(() => {
-        copyButton.innerText = copyButtonLabel;
-      }, 2000);
-    }
-
-    for (let codeBlock of codeBlocks) {
+    for (const pre of document.querySelectorAll<HTMLPreElement>(
+      ".reading-prose pre",
+    )) {
+      if (pre.parentElement?.classList.contains("code-block")) continue;
       const wrapper = document.createElement("div");
-      wrapper.style.position = "relative";
+      wrapper.className = "code-block";
+      pre.before(wrapper);
+      wrapper.append(pre);
+      pre.tabIndex = 0;
 
-      const copyButton = document.createElement("button");
-      copyButton.innerText = copyButtonLabel;
-      copyButton.classList = "copy-code";
-
-      codeBlock.setAttribute("tabindex", "0");
-      codeBlock.appendChild(copyButton);
-
-      codeBlock.parentNode.insertBefore(wrapper, codeBlock);
-      wrapper.appendChild(codeBlock);
-
-      copyButton?.addEventListener("click", async () => {
-        await copyCode(codeBlock, copyButton);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "copy-code";
+      button.textContent = "📋";
+      button.setAttribute("aria-live", "polite");
+      wrapper.append(button);
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          await navigator.clipboard.writeText(
+            pre.querySelector("code")?.textContent ?? pre.textContent ?? "",
+          );
+          button.textContent = "✅";
+        } finally {
+          button.disabled = false;
+        }
+        setTimeout(() => {
+          button.textContent = "📋";
+        }, 2000);
       });
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => init());
-  document.addEventListener("astro:after-swap", () => init());
-  preloadTheme();
+  function initializePage() {
+    syncTheme();
+    addCopyCodeButtons();
+  }
+
+  // 页面替换时沿用当前偏好，避免转场后短暂显示错误的主题。
+  document.addEventListener("astro:before-swap", (event) => {
+    (
+      event as TransitionBeforeSwapEvent
+    ).newDocument.documentElement.classList.toggle("dark", prefersDark());
+  });
+  document.addEventListener("astro:page-load", initializePage);
+  darkPreference.addEventListener("change", () => {
+    if (
+      localStorage.getItem("theme") !== "light" &&
+      localStorage.getItem("theme") !== "dark"
+    )
+      syncTheme();
+  });
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+    if (event.target.closest("#theme-toggle")) {
+      localStorage.setItem(
+        "theme",
+        document.documentElement.classList.contains("dark") ? "light" : "dark",
+      );
+      syncTheme();
+    } else if (event.target.closest("#back-to-top")) {
+      event.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    }
+  });
+  initializePage();
 </script>

@@ -9,27 +9,80 @@ const tags = [...new Set(posts.flatMap((post) => post.data.tags || []))].sort();
 
 <Layout title="Tags" description="List of tags used.">
   <Container>
-    <div class="space-y-10 pt-20">
-      <h1
-        class="animate font-serif text-[32px] font-semibold text-[#211f1c] dark:text-white"
-      >
-        All Tags
-      </h1>
-      <div class="animate flex flex-wrap gap-2">
+    <section class="tag-directory" data-pagefind-ignore>
+      <h1 class="page-heading">All Tags</h1>
+      <ul class="tag-list">
         {
           tags.map((tag) => (
-            <a
-              href={`/tags/${tag}`}
-              class="font-mono text-[11px] tracking-[0.08em] text-[#211f1c]/60 underline decoration-dotted underline-offset-4 transition-colors hover:text-[#211f1c] dark:text-white/60 dark:hover:text-white"
-            >
-              {tag}{" "}
-              <span class="text-sm text-gray-600">
-                ({posts.filter((post) => post.data.tags?.includes(tag)).length})
-              </span>
-            </a>
+            <li>
+              <a href={`/tags/${tag}`} class="tag-link">
+                <span>{tag}</span>
+                <span class="tag-count">
+                  {`(${posts.filter((post) => post.data.tags?.includes(tag)).length})`}
+                </span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h14m-6-6 6 6-6 6" />
+                </svg>
+              </a>
+            </li>
           ))
         }
-      </div>
-    </div>
+      </ul>
+    </section>
   </Container>
 </Layout>
+
+<style>
+  .tag-directory {
+    padding-block: var(--space-8) var(--space-7);
+  }
+
+  .tag-directory h1 {
+    margin: 0 0 var(--space-6);
+  }
+
+  .tag-list {
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--color-line);
+    list-style: none;
+  }
+
+  .tag-link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 20px;
+    min-height: var(--space-7);
+    align-items: center;
+    gap: var(--space-4);
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color var(--motion-duration) var(--motion-ease);
+  }
+
+  .tag-link:hover,
+  .tag-link:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .tag-count {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-meta);
+  }
+
+  .tag-link svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform var(--motion-duration) var(--motion-ease);
+  }
+
+  .tag-link:hover svg,
+  .tag-link:focus-visible svg {
+    transform: translateX(4px);
+  }
+</style>

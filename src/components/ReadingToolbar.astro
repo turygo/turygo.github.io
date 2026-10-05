@@ -1,0 +1,109 @@
+---
+import BackToTop from "@components/BackToTop.astro";
+
+interface Props {
+  hasToc?: boolean;
+}
+
+const { hasToc = false } = Astro.props;
+---
+
+<nav class="glass reading-toolbar" data-pagefind-ignore>
+  <a
+    class="control toolbar-control"
+    href="/blog"
+    aria-label="Back to blog"
+    title="Back to blog"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 5h16v4H4zM6 9v10h12V9m-8 4h4"></path>
+    </svg>
+    <span class="toolbar-label">Back to blog</span>
+  </a>
+  {
+    hasToc && (
+      <a
+        class="control toolbar-control"
+        href="#article-toc"
+        aria-label="Table of Contents"
+        title="Table of Contents"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v15M3 4.5c4-1 6-.5 9 1.5 3-2 5-2.5 9-1.5v14c-4-1-6-.5-9 1.5-3-2-5-2.5-9-1.5Z" />
+        </svg>
+        <span class="toolbar-label">Table of Contents</span>
+      </a>
+    )
+  }
+  <button
+    id="magnifying-glass"
+    type="button"
+    class="control toolbar-control"
+    aria-label="搜索"
+    title="搜索"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10.8" cy="10.8" r="6.2"></circle>
+      <path d="m15.5 15.5 4.2 4.2"></path>
+    </svg>
+    <span class="toolbar-label">搜索</span>
+  </button>
+  <button
+    id="theme-toggle"
+    type="button"
+    class="control icon toolbar-control"
+    aria-label="切换主题"
+    aria-pressed="false"
+    title="切换主题"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20 15.5A9 9 0 0 1 8.5 4 9 9 0 1 0 20 15.5Z"></path>
+    </svg>
+  </button>
+  <BackToTop />
+</nav>
+
+<style>
+  .reading-toolbar {
+    position: fixed;
+    z-index: 30;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    display: flex;
+    width: max-content;
+    max-width: calc(100% - 32px);
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    border-radius: var(--radius-pill);
+    transform: translateX(-50%);
+  }
+
+  .toolbar-control {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .toolbar-control svg {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+  }
+
+  @media (max-width: 760px) {
+    .toolbar-label {
+      display: none;
+    }
+
+    .toolbar-control {
+      width: 44px;
+      padding: 10px;
+    }
+  }
+</style>

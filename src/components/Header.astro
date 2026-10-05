@@ -1,34 +1,153 @@
 ---
-import Container from "@components/Container.astro";
 import { SITE } from "@consts";
+
+interface Props {
+  reading?: boolean;
+}
+
+const { reading = false } = Astro.props;
 ---
 
-<header transition:persist>
-  <Container>
-    <div class="flex items-baseline justify-between py-6">
-      <a
-        href="/"
-        class="font-serif text-sm font-semibold tracking-[0.05em] text-[#211f1c] transition-colors hover:text-black dark:text-white dark:hover:text-white"
-      >
-        {SITE.TITLE}
+<header
+  class:list={["site-header", reading && "site-header--reading"]}
+  data-pagefind-ignore
+>
+  <div class={reading ? "reading-container" : "site-shell"}>
+    <div class="header-row">
+      <a class="brand" href="/">
+        <svg class="brand-home" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m3 10 9-7 9 7"></path>
+          <path d="M5 9v12h5v-7h4v7h5V9"></path>
+        </svg>
+        <span>{SITE.TITLE}</span>
       </a>
-      <nav
-        class="flex items-center gap-[18px] text-[13px] text-[#211f1c]/60 dark:text-white/60"
-      >
-        <a
-          href="/blog"
-          class="transition-colors hover:text-[#211f1c] dark:hover:text-white"
-        >
-          归档
-        </a>
-        <button
-          id="magnifying-glass"
-          aria-label="搜索"
-          class="cursor-pointer transition-colors hover:text-[#211f1c] dark:hover:text-white"
-        >
-          搜索
-        </button>
-      </nav>
+      {
+        reading ? (
+          <nav class="glass site-nav">
+            <a class="control" href="/blog">
+              归档
+            </a>
+          </nav>
+        ) : (
+          <nav class="glass site-nav">
+            <a class="control" href="/blog">
+              归档
+            </a>
+            <button
+              id="magnifying-glass"
+              type="button"
+              aria-label="搜索"
+              title="搜索"
+              class="control"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.2" />
+                <path d="m15.5 15.5 4.2 4.2" />
+              </svg>
+              <span class="header-label">搜索</span>
+            </button>
+            <button
+              id="theme-toggle"
+              type="button"
+              aria-label="切换主题"
+              aria-pressed="false"
+              title="切换主题"
+              class="control icon"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20 15.5A9 9 0 0 1 8.5 4 9 9 0 1 0 20 15.5Z" />
+              </svg>
+            </button>
+          </nav>
+        )
+      }
     </div>
-  </Container>
+  </div>
 </header>
+
+<style>
+  .site-header {
+    margin-bottom: var(--space-9);
+  }
+
+  .site-header--reading {
+    margin-bottom: 0;
+  }
+
+  .header-row {
+    display: flex;
+    min-height: 88px;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-block: var(--space-5);
+  }
+
+  .brand {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .brand:hover,
+  .brand:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .brand-home {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+  }
+
+  .site-nav {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    border-radius: var(--radius-pill);
+  }
+
+  .site-nav svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+  }
+
+  @media (max-width: 760px) {
+    .site-header {
+      margin-bottom: var(--space-7);
+    }
+
+    .site-header--reading {
+      margin-bottom: 0;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .header-label {
+      display: none;
+    }
+
+    .site-nav button {
+      width: 44px;
+      padding: 10px;
+    }
+  }
+</style>

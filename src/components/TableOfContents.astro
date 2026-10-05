@@ -1,43 +1,74 @@
 ---
 import TableOfContentsHeading from "./TableOfContentsHeading.astro";
 
-// https://kld.dev/building-table-of-contents/
-const { headings } = Astro.props;
-const toc = buildToc(headings);
-
 export interface Heading {
   depth: number;
   slug: string;
   text: string;
 }
 
-function buildToc(headings: Heading[]) {
-  const toc: Heading[] = [];
-  const parentHeadings = new Map();
+type TocHeading = Heading & { subheadings: TocHeading[] };
+
+const { headings } = Astro.props as { headings: Heading[] };
+const toc = buildToc(headings);
+
+function buildToc(headings: Heading[]): TocHeading[] {
+  const toc: TocHeading[] = [];
+  const parentHeadings = new Map<number, TocHeading>();
   headings.forEach((h) => {
-    const heading = { ...h, subheadings: [] };
+    const heading: TocHeading = { ...h, subheadings: [] };
     parentHeadings.set(heading.depth, heading);
     if (heading.depth === 2) {
       toc.push(heading);
     } else {
-      parentHeadings.get(heading.depth - 1).subheadings.push(heading);
+      parentHeadings.get(heading.depth - 1)!.subheadings.push(heading);
     }
   });
   return toc;
 }
 ---
 
-<details
-  open
-  class="animate group border-y border-[#211f1c]/15 dark:border-white/20"
->
-  <summary
-    class="cursor-pointer py-2 font-serif font-semibold text-[#211f1c] transition-colors hover:text-black dark:text-white dark:hover:text-white"
-    >Table of Contents</summary
-  >
+<details id="article-toc" open class="table-of-contents" data-pagefind-ignore>
+  <summary>Table of Contents</summary>
   <nav>
-    <ul class="py-3">
+    <ul class="toc-list">
       {toc.map((heading) => <TableOfContentsHeading heading={heading} />)}
     </ul>
   </nav>
 </details>
+
+<style>
+  .table-of-contents {
+    border-block: 1px solid var(--color-line);
+  }
+
+  .table-of-contents summary {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    cursor: pointer;
+    color: var(--color-text);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    list-style: none;
+  }
+
+  .table-of-contents summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .table-of-contents summary::after {
+    margin-left: auto;
+    color: var(--color-text-secondary);
+    content: "+";
+  }
+
+  .table-of-contents[open] summary::after {
+    content: "−";
+  }
+
+  .toc-list {
+    margin: 0;
+    padding: 0 0 var(--space-3);
+  }
+</style>

@@ -1,108 +1,239 @@
 @import "tailwindcss";
+@import "./tokens.css";
 
 @plugin "@tailwindcss/typography";
-
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  --font-sans:
-    Geist Sans, ui-sans-serif, system-ui, -apple-system, "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-mono:
-    Geist Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", "PingFang SC", "Microsoft YaHei",
-    monospace;
-  --font-serif:
-    "Source Serif 4", "Noto Serif SC", "Songti SC", "SimSun", Georgia, serif;
-}
-
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
   *,
-  ::after,
   ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+  ::after {
+    box-sizing: border-box;
+    border-color: var(--color-line);
   }
-}
-
-@layer utilities {
   html {
-    overflow-y: auto;
-    color-scheme: light;
-    scroll-padding-top: 24px;
+    scroll-padding-top: var(--space-5);
   }
-
-  html.dark {
-    color-scheme: dark;
-  }
-
-  html,
   body {
-    @apply size-full;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-canvas);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+    -webkit-font-smoothing: antialiased;
   }
-
-  body {
-    @apply font-sans antialiased;
-    @apply flex flex-col;
-    @apply bg-[#f6f5f3] dark:bg-[#171716];
-    @apply text-[#211f1c] dark:text-white/75;
-  }
-
   main {
-    @apply flex-1;
+    flex: 1;
   }
-
-  article {
-    @apply prose prose-neutral dark:prose-invert prose-img:mx-auto prose-img:my-auto max-w-full;
-    @apply prose-headings:font-serif prose-headings:font-semibold;
-    @apply prose-headings:text-[#211f1c] dark:prose-headings:text-white;
+  button,
+  input {
+    font: inherit;
+  }
+  button {
+    cursor: pointer;
+  }
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 4px;
+  }
+  ::selection {
+    color: var(--color-text);
+    background: var(--color-selection);
+  }
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.035em;
   }
 }
 
-@layer utilities {
-  article a {
-    @apply font-sans text-current underline underline-offset-[3px];
-    @apply decoration-black/30 dark:decoration-white/30;
-    @apply transition-colors duration-300 ease-in-out;
-  }
-  article a:hover {
-    @apply text-black dark:text-white;
-    @apply decoration-black/50 dark:decoration-white/50;
-  }
+body.reading-page {
+  padding-bottom: calc(128px + env(safe-area-inset-bottom));
+}
+.site-shell,
+.page-container,
+.reading-container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+}
+.site-shell {
+  max-width: 1000px;
+}
+.page-container {
+  max-width: 844px;
+}
+.reading-container {
+  max-width: calc(var(--width-reading) + 64px);
+}
+.page-section {
+  padding-block: var(--space-7);
+}
+.page-heading {
+  font-size: 2.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: var(--space-6);
+}
+.eyebrow {
+  color: var(--color-text-secondary);
+  font: 500 var(--font-size-meta)/1.5 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-meta);
+}
+.control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  text-decoration: none;
+  transition:
+    background var(--motion-duration) var(--motion-ease),
+    color var(--motion-duration) var(--motion-ease);
+}
+.control:hover {
+  color: var(--color-text);
+  background: var(--color-hover);
+}
+.control[aria-current="page"],
+.control[aria-pressed="true"] {
+  background: var(--color-selection);
+  color: var(--color-accent);
+}
+.control.icon {
+  width: 44px;
+  padding: 10px;
+  flex-shrink: 0;
+}
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  color: var(--color-accent);
+  font-size: var(--font-size-small);
+  text-decoration: none;
+}
+.text-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
-.animate {
-  @apply -translate-y-3 opacity-0;
-  @apply transition-all duration-300 ease-out;
+/* 正文各段使用相同字号和行高，不为首段单独设置导语样式。 */
+.reading-prose {
+  @apply prose max-w-none;
+  --tw-prose-body: var(--color-text);
+  --tw-prose-headings: var(--color-text);
+  --tw-prose-lead: var(--color-text-secondary);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-text);
+  --tw-prose-counters: var(--color-text-secondary);
+  --tw-prose-bullets: var(--color-text-secondary);
+  --tw-prose-hr: var(--color-line);
+  --tw-prose-quotes: var(--color-text);
+  --tw-prose-quote-borders: var(--color-line);
+  --tw-prose-captions: var(--color-text-secondary);
+  --tw-prose-kbd: var(--color-text);
+  --tw-prose-kbd-shadows: transparent;
+  --tw-prose-code: var(--color-text);
+  --tw-prose-pre-code: var(--astro-code-foreground);
+  --tw-prose-pre-bg: var(--astro-code-background);
+  --tw-prose-th-borders: var(--color-line);
+  --tw-prose-td-borders: var(--color-line);
+  font-size: var(--font-size-reading);
+  line-height: var(--line-height-reading);
+  overflow-wrap: anywhere;
+}
+.reading-prose :where(p) {
+  font-size: inherit;
+  line-height: inherit;
+}
+.reading-prose :where(p + p) {
+  margin-top: var(--space-5);
+}
+.reading-prose :where(h1, h2, h3, h4) {
+  font-family: var(--font-sans);
+  font-weight: 600;
+}
+.reading-prose :where(a) {
+  text-underline-offset: 3px;
+}
+.reading-prose :where(img) {
+  margin-inline: auto;
+  border-radius: var(--radius-control);
+}
+.reading-prose :where(code, pre, kbd) {
+  font-family: var(--font-mono);
+}
+.reading-prose :where(pre) {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--astro-code-background);
+  padding: var(--space-5);
+  overflow-x: auto;
+  font-size: var(--font-size-small);
+  overflow-wrap: normal;
+}
+.reading-prose :where(blockquote) {
+  font-style: normal;
+  color: var(--color-text-secondary);
+}
+.reading-prose :where(table) {
+  display: block;
+  overflow-x: auto;
+  overflow-wrap: normal;
+}
+.code-block {
+  position: relative;
+  margin-block: var(--space-5);
+  min-width: 0;
+}
+.code-block pre {
+  margin: 0;
+  padding-top: var(--space-8);
+}
+.copy-code {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-meta);
+  transition: background var(--motion-duration) var(--motion-ease);
+}
+.copy-code:hover {
+  background: var(--color-hover);
+  color: var(--color-text);
 }
 
-.animate.show {
-  @apply translate-y-0 opacity-100;
-}
-
-html #back-to-top {
-  @apply pointer-events-none opacity-0;
-}
-
-html.scrolled #back-to-top {
-  @apply pointer-events-auto opacity-100;
-}
-
-/* shiki config */
-pre {
-  @apply border border-black/15 py-5 dark:border-white/20;
-}
-
+/* 代码语法高亮颜色独立于界面的单一强调色，沿用现有高亮主题。 */
 :root {
   --astro-code-foreground: #09090b;
   --astro-code-background: #fafafa;
@@ -116,8 +247,7 @@ pre {
   --astro-code-token-punctuation: #8996a3;
   --astro-code-token-link: #8d85ff;
 }
-
-.dark {
+:root.dark {
   --astro-code-foreground: #fafafa;
   --astro-code-background: #09090b;
   --astro-code-token-comment: #a19595;
@@ -131,15 +261,29 @@ pre {
   --astro-code-token-link: #8d85ff;
 }
 
-/* copy code button on codeblocks */
-.copy-code {
-  @apply absolute top-3 right-3 grid size-9 place-content-center rounded-sm border border-black/15 bg-neutral-100 text-center duration-300 ease-in-out dark:border-white/20 dark:bg-neutral-900;
+@media (max-width: 760px) {
+  .site-shell,
+  .page-container,
+  .reading-container {
+    padding-inline: var(--space-5);
+  }
+  .page-heading {
+    font-size: 2rem;
+  }
 }
-
-.copy-code:hover {
-  @apply bg-[#E9E9E9] transition-colors dark:bg-[#232323];
+@media (max-width: 360px) {
+  .site-shell,
+  .page-container,
+  .reading-container {
+    padding-inline: var(--space-4);
+  }
 }
-
-.copy-code:active {
-  @apply scale-90 transition-transform;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
 }

@@ -1,10 +1,8 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import Layout from "@layouts/Layout.astro";
-import Container from "@components/Container.astro";
 import FormattedDate from "@components/FormattedDate.astro";
 import { readingTime } from "@lib/utils";
-import BackToPrevious from "@components/BackToPrevious.astro";
 import PostNavigation from "@components/PostNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
 
@@ -50,47 +48,115 @@ const post = Astro.props;
 const { Content, headings } = await render(post);
 ---
 
-<Layout title={post.data.title} description={post.data.description}>
-  <Container>
-    <div class="pt-16">
-      <div class="animate">
-        <BackToPrevious href="/blog">Back to blog</BackToPrevious>
-      </div>
-      <div class="my-10 space-y-2">
-        <div
-          class="animate flex items-center gap-1.5 font-mono text-[11px] tracking-[0.08em] text-[#211f1c]/50 dark:text-white/50"
-        >
-          <FormattedDate date={post.data.date} />
-          <span aria-hidden="true">·</span>
-          {post.body && <span>{readingTime(post.body)}</span>}
-        </div>
-        <h1
-          class="animate font-serif text-[34px] leading-[1.25] font-semibold text-[#211f1c] dark:text-white"
-        >
-          {post.data.title}
-        </h1>
-        {
-          post.data.tags && post.data.tags?.length > 0 ? (
-            <div class="animate flex gap-2 pt-1">
-              {post.data.tags.map((tag) => (
-                <a
-                  href={`/tags/${tag}`}
-                  class="font-mono text-[10px] font-medium tracking-[0.14em] text-[#211f1c]/45 uppercase transition-colors hover:text-[#211f1c] dark:text-white/45 dark:hover:text-white"
-                >
-                  {tag}
-                </a>
-              ))}
-            </div>
-          ) : null
-        }
-      </div>
-      {headings.length > 0 && <TableOfContents headings={headings} />}
-      <article class="animate">
-        <Content />
-        <div class="mt-24">
-          <PostNavigation prevPost={prevPost} nextPost={nextPost} />
-        </div>
-      </article>
+<Layout
+  title={post.data.title}
+  description={post.data.description}
+  reading
+  hasToc={headings.length > 0}
+>
+  <header class="reading-container reading-head">
+    <div class="meta reading-meta">
+      <FormattedDate date={post.data.date} />
+      <span aria-hidden="true">·</span>
+      {post.body && <span>{readingTime(post.body)}</span>}
     </div>
-  </Container>
+    <h1 class="reading-title" data-pagefind-meta="title">
+      {post.data.title}
+    </h1>
+    {
+      post.data.tags && post.data.tags.length > 0 && (
+        <div class="reading-tags">
+          {post.data.tags.map((tag) => (
+            <a href={`/tags/${tag}`} class="reading-tag">
+              {tag}
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </header>
+  {
+    headings.length > 0 && (
+      <div class="reading-container toc-container">
+        <TableOfContents headings={headings} />
+      </div>
+    )
+  }
+  <div class="reading-container">
+    <article class="reading-prose" data-pagefind-body>
+      <Content />
+    </article>
+  </div>
+  {
+    (prevPost || nextPost) && (
+      <div class="reading-container post-navigation-container">
+        <PostNavigation prevPost={prevPost} nextPost={nextPost} />
+      </div>
+    )
+  }
 </Layout>
+
+<style>
+  .reading-head {
+    padding-block: var(--space-8) var(--space-6);
+    text-align: center;
+  }
+
+  .reading-meta {
+    justify-content: center;
+    margin-bottom: var(--space-5);
+  }
+
+  .reading-title {
+    margin: 0;
+    font-size: min(var(--font-size-title), 4rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+  }
+
+  .reading-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3) var(--space-4);
+    margin-top: var(--space-4);
+  }
+
+  .reading-tag {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-meta);
+    text-decoration: underline;
+    text-decoration-color: var(--color-line);
+    text-underline-offset: 3px;
+    transition:
+      color var(--motion-duration) var(--motion-ease),
+      text-decoration-color var(--motion-duration) var(--motion-ease);
+  }
+
+  .reading-tag:hover,
+  .reading-tag:focus-visible {
+    color: var(--color-accent);
+    text-decoration-color: currentColor;
+  }
+
+  .toc-container {
+    margin-bottom: var(--space-6);
+  }
+
+  .post-navigation-container {
+    margin-top: var(--space-8);
+    padding-bottom: var(--space-7);
+  }
+
+  @media (max-width: 760px) {
+    .reading-head {
+      padding-block: var(--space-6) var(--space-5);
+    }
+
+    .reading-title {
+      font-size: 2.5rem;
+    }
+  }
+</style>

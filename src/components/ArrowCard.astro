@@ -10,16 +10,82 @@ const { entry } = Astro.props as {
 };
 ---
 
-<a
-  href={`/${entry.collection}/${entry.id}`}
-  class="not-prose group block border-t border-[#211f1c]/15 py-5 transition-colors dark:border-white/20"
->
-  <div
-    class="font-serif text-[17px] font-semibold text-[#211f1c] underline-offset-4 group-hover:underline dark:text-white"
-  >
-    {entry.data.title}
+<a href={`/${entry.collection}/${entry.id}`} class="arrow-card">
+  <div class="arrow-card-copy">
+    <h2>{entry.data.title}</h2>
+    <p>{entry.data.description}</p>
   </div>
-  <div class="mt-1.5 text-sm leading-7 text-[#211f1c]/60 dark:text-white/60">
-    {entry.data.description}
-  </div>
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M5 12h14m-6-6 6 6-6 6"></path>
+  </svg>
 </a>
+
+<style>
+  .arrow-card {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    border-top: 1px solid var(--color-line);
+    padding-block: var(--space-5);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color var(--motion-duration) var(--motion-ease);
+  }
+
+  .arrow-card-copy {
+    min-width: 0;
+  }
+
+  .arrow-card h2 {
+    margin: 0;
+    font-size: var(--font-size-body);
+    font-weight: 600;
+    line-height: var(--line-height-body);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 4px;
+    transition:
+      color var(--motion-duration) var(--motion-ease),
+      text-decoration-color var(--motion-duration) var(--motion-ease);
+  }
+
+  .arrow-card p {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+    line-height: var(--line-height-body);
+  }
+
+  .arrow-card > svg {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    color: var(--color-text-secondary);
+    transition:
+      transform var(--motion-duration) var(--motion-ease),
+      color var(--motion-duration) var(--motion-ease);
+  }
+
+  .arrow-card:hover,
+  .arrow-card:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .arrow-card:hover h2,
+  .arrow-card:focus-visible h2 {
+    text-decoration-color: currentColor;
+  }
+
+  .arrow-card:hover > svg,
+  .arrow-card:focus-visible > svg {
+    transform: translateX(4px);
+    color: var(--color-accent);
+  }
+</style>

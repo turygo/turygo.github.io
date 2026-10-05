@@ -3,15 +3,21 @@ import Search from "astro-pagefind/components/Search";
 ---
 
 <aside data-pagefind-ignore>
-  <div
-    transition:persist
-    id="backdrop"
-    class="bg-[rgba(0, 0, 0, 0.5] invisible fixed top-0 left-0 z-50 flex h-screen w-full justify-center p-6 backdrop-blur-xs"
-  >
-    <div
-      id="pagefind-container"
-      class="m-0 flex h-fit max-h-[80%] w-full max-w-(--breakpoint-sm) flex-col overflow-auto rounded-sm border border-black/15 bg-neutral-100 p-2 px-4 py-3 shadow-lg dark:border-white/20 dark:bg-neutral-900"
-    >
+  <dialog id="search-dialog" aria-label="搜索">
+    <div class="search-dialog-header">
+      <button
+        type="button"
+        class="control icon search-close"
+        data-search-close
+        aria-label="Press Esc or click anywhere to close"
+        title="Press Esc or click anywhere to close"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m6 6 12 12M18 6 6 18"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="search-dialog-content">
       <Search
         id="search"
         className="pagefind-ui"
@@ -21,104 +27,213 @@ import Search from "astro-pagefind/components/Search";
           resetStyles: false,
         }}
       />
-      <div class="dark:prose-invert mr-2 pt-4 pb-1 text-right text-xs">
-        Press <span class="prose dark:prose-invert text-xs"
-          ><kbd class="">Esc</kbd></span
-        > or click anywhere to close
+      <div class="search-close-hint">
+        Press <kbd>Esc</kbd> or click anywhere to close
       </div>
     </div>
-  </div>
+  </dialog>
 </aside>
 
-<script is:inline>
-  const magnifyingGlass = document.getElementById("magnifying-glass");
-  const backdrop = document.getElementById("backdrop");
+<script>
+  const initializedDialogs = new WeakSet<HTMLDialogElement>();
+  const returnFocusTargets = new WeakMap<
+    HTMLDialogElement,
+    HTMLElement | null
+  >();
 
-  function openPagefind() {
-    const searchDiv = document.getElementById("search");
-    const search = searchDiv.querySelector("input");
-    setTimeout(() => {
-      search.focus();
-    }, 0);
-    backdrop?.classList.remove("invisible");
-    backdrop?.classList.add("visible");
+  function currentDialog(): HTMLDialogElement | null {
+    const dialog = document.getElementById("search-dialog");
+    if (!(dialog instanceof HTMLDialogElement)) return null;
+
+    if (!initializedDialogs.has(dialog)) {
+      initializedDialogs.add(dialog);
+      dialog.addEventListener("close", () => {
+        const input = dialog.querySelector<HTMLInputElement>("#search input");
+        if (input && input.value) {
+          input.value = "";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+
+        const returnTarget = returnFocusTargets.get(dialog);
+        returnFocusTargets.delete(dialog);
+        if (returnTarget?.isConnected) returnTarget.focus();
+      });
+    }
+
+    return dialog;
   }
 
-  function closePagefind() {
-    const search = document.getElementById("search");
-    search.value = "";
-    backdrop?.classList.remove("visible");
-    backdrop?.classList.add("invisible");
+  function focusSearchInput(dialog: HTMLDialogElement) {
+    dialog
+      .querySelector<HTMLInputElement>("#search input")
+      ?.focus({ preventScroll: true });
   }
 
-  // open pagefind
-  magnifyingGlass?.addEventListener("click", () => {
-    openPagefind();
-  });
+  function openSearch(returnTarget: HTMLElement | null) {
+    const dialog = currentDialog();
+    if (!dialog) return;
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "/") {
-      e.preventDefault();
-      openPagefind();
-    } else if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-      e.preventDefault();
-      openPagefind();
+    if (!dialog.open) {
+      returnFocusTargets.set(dialog, returnTarget);
+      dialog.showModal();
     }
-  });
 
-  // close pagefind
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closePagefind();
-    }
-  });
+    focusSearchInput(dialog);
+    requestAnimationFrame(() => {
+      const activeDialog = currentDialog();
+      if (activeDialog?.open) focusSearchInput(activeDialog);
+    });
+  }
 
-  // close pagefind when searched result(link) clicked
+  function closeSearch(restoreFocus = true) {
+    const dialog = currentDialog();
+    if (!dialog) return;
+    if (!restoreFocus) returnFocusTargets.set(dialog, null);
+    if (!dialog.open) return;
+    dialog.close();
+  }
+
   document.addEventListener("click", (event) => {
-    if (event.target.classList.contains("pagefind-ui__result-link")) {
-      closePagefind();
+    if (!(event.target instanceof Element)) return;
+    const target = event.target;
+    const trigger = target.closest<HTMLButtonElement>("#magnifying-glass");
+    if (trigger) {
+      event.preventDefault();
+      openSearch(trigger);
+      return;
+    }
+
+    const dialog = currentDialog();
+    if (!dialog?.open) return;
+    if (target === dialog) {
+      closeSearch();
+      return;
+    }
+    if (dialog.contains(target) && target.closest("[data-search-close]")) {
+      closeSearch();
+      return;
+    }
+
+    const resultLink = target.closest(".pagefind-ui__result-link");
+    if (resultLink && dialog.contains(resultLink)) closeSearch();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      openSearch(
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null,
+      );
+      return;
+    }
+
+    const target = event.target;
+    const isEditing =
+      target instanceof Element &&
+      target.closest(
+        'input, textarea, select, [contenteditable]:not([contenteditable="false"])',
+      ) !== null;
+    if (
+      event.key === "/" &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.altKey &&
+      !isEditing
+    ) {
+      event.preventDefault();
+      openSearch(
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null,
+      );
     }
   });
 
-  backdrop?.addEventListener("click", (event) => {
-    if (!event.target.closest("#pagefind-container")) {
-      closePagefind();
+  document.addEventListener("astro:before-swap", () => closeSearch(false));
+  document.addEventListener("astro:page-load", () => {
+    const dialog = currentDialog();
+    if (dialog?.open) {
+      requestAnimationFrame(() => {
+        const activeDialog = currentDialog();
+        if (activeDialog?.open) focusSearchInput(activeDialog);
+      });
     }
-  });
-
-  // prevent form submission
-  const form = document.getElementById("form");
-  form?.addEventListener("submit", (event) => {
-    event.preventDefault();
   });
 </script>
 
 <style is:global>
-  :root {
-    --pagefind-ui-scale: 0.75;
-    --pagefind-ui-border-width: 1px;
-    --pagefind-ui-border-radius: 3px;
-    --pagefind-ui-font: "Geist", sans-serif;
-    --pagefind-ui-primary: #3d3d3d;
-    --pagefind-ui-text: #3d3d3d;
-    --pagefind-ui-background: #ffffff;
-    --pagefind-ui-border: #d0d0d0;
-    --pagefind-ui-tag: #f5f5f5;
+  #search-dialog {
+    --pagefind-ui-font: var(--font-sans);
+    --pagefind-ui-primary: var(--color-accent);
+    --pagefind-ui-text: var(--color-text);
+    --pagefind-ui-background: var(--color-surface);
+    --pagefind-ui-border: var(--color-line);
+    --pagefind-ui-tag: var(--color-hover);
+    --pagefind-ui-border-radius: var(--radius-control);
+
+    box-sizing: border-box;
+    width: min(680px, calc(100vw - 48px));
+    max-width: 680px;
+    max-height: calc(100dvh - 48px);
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-panel);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-surface);
   }
 
-  .dark {
-    --pagefind-ui-primary: #d4d4d4;
-    --pagefind-ui-text: #d4d4d4;
-    --pagefind-ui-background: #171717;
-    --pagefind-ui-border: #404040;
+  #search-dialog[open] {
+    display: flex;
+    flex-direction: column;
   }
 
-  #search input {
-    font-weight: normal;
+  #search-dialog::backdrop {
+    background: color-mix(in srgb, var(--color-text) 36%, transparent);
   }
 
+  #search-dialog .search-dialog-header {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-5);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  #search-dialog .search-close svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 1.75;
+  }
+
+  #search-dialog .search-dialog-content {
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-4) var(--space-5) var(--space-5);
+  }
+  .search-close-hint {
+    margin-top: var(--space-4);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-meta);
+    text-align: right;
+  }
+
+  #search {
+    min-width: 0;
+  }
+
+  #search input,
   #search p {
-    font-weight: normal;
+    font-weight: 400;
   }
 
   #search .pagefind-ui__result-title {
@@ -126,7 +241,6 @@ import Search from "astro-pagefind/components/Search";
   }
 
   #search .pagefind-ui__message {
-    padding: 0;
-    padding-bottom: 0.75rem;
+    padding: 0 0 var(--space-3);
   }
 </style>

@@ -2,22 +2,38 @@
 import type { Heading } from "./TableOfContents.astro";
 import Link from "./Link.astro";
 
-// https://kld.dev/building-table-of-contents/
-
-const { heading } = Astro.props;
+type TocHeading = Heading & { subheadings: TocHeading[] };
+const { heading } = Astro.props as { heading: TocHeading };
 ---
 
-<li class="list-inside list-disc px-6 py-1.5 text-sm">
+<li class="toc-item">
   <Link href={"#" + heading.slug} underline>
     {heading.text}
   </Link>
   {
     heading.subheadings.length > 0 && (
-      <ul class="translate-x-3">
-        {heading.subheadings.map((subheading: Heading) => (
+      <ul class="toc-subheadings">
+        {heading.subheadings.map((subheading) => (
           <Astro.self heading={subheading} />
         ))}
       </ul>
     )
   }
 </li>
+
+<style>
+  .toc-item {
+    margin-block: var(--space-2);
+    padding-inline-start: var(--space-5);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+    list-style: disc inside;
+  }
+
+  .toc-subheadings {
+    margin: var(--space-2) 0 0;
+    padding-inline-start: var(--space-4);
+    border-inline-start: 1px solid var(--color-line);
+    list-style: circle inside;
+  }
+</style>

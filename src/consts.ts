@@ -13,7 +13,7 @@ export const HOME: Metadata = {
 
 export const BLOG: Metadata = {
   TITLE: "文章",
-  DESCRIPTION: "记录一些想法与技术笔记。",
+  DESCRIPTION: "随便写写",
 };
 
 export const SOCIALS: Socials = [

@@ -7,15 +7,25 @@ import { SITE } from "@consts";
 
 <Layout title="404" description={SITE.DESCRIPTION}>
   <Container>
-    <div class="grid place-items-center gap-3 pt-20">
-      <h4
-        class="animate font-serif text-2xl font-semibold text-[#211f1c] dark:text-white"
-      >
-        404: Page not found
-      </h4>
-      <span class="animate">
-        <BackToPrevious href="/">Go to home page</BackToPrevious>
-      </span>
-    </div>
+    <section class="not-found" data-pagefind-ignore>
+      <h1 class="page-heading">404: Page not found</h1>
+      <BackToPrevious href="/">Go to home page</BackToPrevious>
+    </section>
   </Container>
 </Layout>
+
+<style>
+  .not-found {
+    display: grid;
+    min-height: 20rem;
+    align-content: center;
+    justify-items: center;
+    gap: var(--space-3);
+    padding-block: var(--space-8);
+    text-align: center;
+  }
+
+  .not-found h1 {
+    margin: 0 0 var(--space-3);
+  }
+</style>

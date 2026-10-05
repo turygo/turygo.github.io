@@ -2,29 +2,46 @@
 interface Props {
   type?: "default" | "info" | "warning" | "error";
 }
-const { type = "default" } = Astro.props;
-let emoji = "💡";
-if (type === "info") {
-  emoji = "ℹ️";
-} else if (type === "warning") {
-  emoji = "⚠️";
-} else if (type === "error") {
-  emoji = "🚨";
-}
 
-const baseClasses = "relative my-4 flex rounded border p-3";
-const typeClasses = {
-  default:
-    "border-orange-800 bg-orange-100 text-orange-950 dark:border-orange-200/20 dark:bg-orange-950/20 dark:text-orange-200",
-  info: "border-blue-800 bg-blue-100 text-blue-950 dark:border-blue-200/20 dark:bg-blue-950/20 dark:text-blue-200",
-  warning:
-    "border-yellow-800 bg-yellow-100 text-yellow-950 dark:border-yellow-200/20 dark:bg-yellow-950/20 dark:text-yellow-200",
-  error:
-    "border-red-800 bg-red-100 text-red-950 dark:border-red-200/20 dark:bg-red-950/20 dark:text-red-200",
+type CalloutType = NonNullable<Props["type"]>;
+
+const { type = "default" } = Astro.props;
+const emojis: Record<CalloutType, string> = {
+  default: "💡",
+  info: "ℹ️",
+  warning: "⚠️",
+  error: "🚨",
 };
 ---
 
-<div class:list={["not-prose", baseClasses, typeClasses[type]]}>
-  <span class="pointer-events-none pr-3 text-xl select-none">{emoji}</span>
-  <slot />
+<div class="not-prose callout" role="note">
+  <span class="callout-icon">{emojis[type]}</span>
+  <div class="callout-content">
+    <slot />
+  </div>
 </div>
+
+<style>
+  .callout {
+    display: flex;
+    gap: var(--space-3);
+    margin-block: var(--space-4);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-control);
+    padding: var(--space-4);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .callout-icon {
+    display: grid;
+    flex: none;
+    place-items: start center;
+    color: var(--color-text-secondary);
+    font-size: 1.25rem;
+  }
+
+  .callout-content {
+    min-width: 0;
+  }
+</style>
